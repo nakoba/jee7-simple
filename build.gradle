@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'war'
+    id 'eclipse'
+    id 'idea'
+    id 'com.bmuschko.cargo' version "2.0.3"
+}
+
+repositories {
+    maven { url 'https://repository.jboss.org/nexus/content/groups/public' }
+    mavenCentral()
+}
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+dependencies {
+    providedCompile 'org.jboss.spec:jboss-javaee-all-7.0:1.0.2.Final'
+    
+    testCompile 'junit:junit:4.11'
+    
+    testCompile 'org.jboss.arquillian.junit:arquillian-junit-container:1.1.7.Final'
+    testCompile 'org.jboss.arquillian.protocol:arquillian-protocol-servlet:1.1.7.Final'
+    testCompile 'org.wildfly:wildfly-arquillian-container-managed:8.2.0.Final'
+}
+
+cargo {
+    containerId = 'wildfly8x'
+    
+    deployable {
+        file = file(war.archivePath)
+    }
+
+    local {
+        installer {
+            installUrl = 'http://download.jboss.org/wildfly/8.2.0.Final/wildfly-8.2.0.Final.zip'
+            downloadDir = file("$buildDir/download")
+            extractDir = file("wildfly")
+        }
+        containerProperties { property 'cargo.jboss.configuration', 'standalone-full' }
+    }
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.2.1'
+}
